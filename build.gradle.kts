@@ -17,7 +17,11 @@ intellij {
     version.set("2022.1.4")
     type.set("IC") // Target IDE Platform
 
-    plugins.set(listOf("com.intellij.java", "org.jetbrains.kotlin"))
+    plugins.set(listOf(
+        "com.intellij.java",
+        "org.jetbrains.kotlin",
+        "Dart:221.6103.1", // https://plugins.jetbrains.com/plugin/6351-dart/versions
+        ))
 }
 
 tasks {

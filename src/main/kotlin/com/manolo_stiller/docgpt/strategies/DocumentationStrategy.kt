@@ -5,6 +5,7 @@ import com.intellij.lang.java.JavaLanguage
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiElement
+import com.jetbrains.lang.dart.DartLanguage
 import org.jetbrains.kotlin.idea.KotlinLanguage
 
 interface DocumentationStrategy {
@@ -16,6 +17,7 @@ interface DocumentationStrategy {
             return when (language) {
                 JavaLanguage.INSTANCE -> JavaDocumentationStrategy()
                 KotlinLanguage.INSTANCE -> KotlinDocumentationStrategy()
+                DartLanguage.INSTANCE -> DartDocumentationStrategy()
                 else -> null  // unsupported language
             }
         }
