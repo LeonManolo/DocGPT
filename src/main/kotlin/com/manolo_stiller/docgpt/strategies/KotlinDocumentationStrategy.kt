@@ -14,6 +14,6 @@ class KotlinDocumentationStrategy : DocumentationStrategy {
 
     override fun createComment(project: Project, text: String): PsiComment {
         val psiFactory = KtPsiFactory(project)
-        return psiFactory.createComment("/** This is a KDoc comment */")
+        return psiFactory.createComment(text)
     }
 }

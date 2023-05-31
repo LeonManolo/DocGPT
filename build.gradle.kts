@@ -11,12 +11,27 @@ repositories {
     mavenCentral()
 }
 
+dependencies {
+    val ktor_version = "2.3.0"
+
+    implementation("com.aallam.openai:openai-client:3.2.4") {
+        exclude(group = "org.slf4j", module = "slf4j-api")
+    }
+    implementation("io.ktor:ktor-client-apache5:$ktor_version") {
+        exclude(group = "org.slf4j", module = "slf4j-api")
+    }
+
+}
+
+
+
 // Configure Gradle IntelliJ Plugin
 // Read more: https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html
 intellij {
     version.set("2022.1.4")
     type.set("IC") // Target IDE Platform
 
+    // https://plugins.jetbrains.com/docs/intellij/plugin-dependencies.html#preparing-sandbox
     plugins.set(listOf(
         "com.intellij.java",
         "org.jetbrains.kotlin",
@@ -48,8 +63,4 @@ tasks {
     publishPlugin {
         token.set(System.getenv("PUBLISH_TOKEN"))
     }
-}
-
-dependencies {
-
 }

@@ -23,6 +23,6 @@ class DartDocumentationStrategy : DocumentationStrategy {
     //DartElementGenerator
     override fun createComment(project: Project, text: String): PsiComment {
         val psiFactory = KtPsiFactory(project)
-        return psiFactory.createComment("/// This is a DartDoc comment")
+        return psiFactory.createComment(text)
     }
 }

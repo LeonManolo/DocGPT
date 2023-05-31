@@ -14,6 +14,6 @@ class JavaDocumentationStrategy : DocumentationStrategy {
 
     override fun createComment(project: Project, text: String): PsiComment {
         val elementFactory = JavaPsiFacade.getElementFactory(project)
-        return elementFactory.createDocCommentFromText("/** This is a javadoc comment */")
+        return elementFactory.createDocCommentFromText(text)
     }
 }
