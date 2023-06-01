@@ -11,7 +11,7 @@ import org.jetbrains.kotlin.psi.KtNamedFunction
 
 class DocGPT : AnAction() {
     private val notificationGroup: NotificationGroup =
-        NotificationGroupManager.getInstance().getNotificationGroup("DocGPT")
+        NotificationGroupManager.getInstance().getNotificationGroup("DocGPT_balloon")
 
     override fun actionPerformed(e: AnActionEvent) {
         //BrowserUtil.browse("https://google.de")

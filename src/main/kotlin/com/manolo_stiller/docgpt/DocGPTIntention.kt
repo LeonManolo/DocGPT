@@ -3,6 +3,7 @@ package com.manolo_stiller.docgpt
 import com.aallam.openai.api.completion.CompletionRequest
 import com.aallam.openai.api.model.ModelId
 import com.aallam.openai.client.OpenAI
+import com.aallam.openai.client.RetryStrategy
 import com.intellij.codeInsight.intention.IntentionAction
 import com.intellij.codeInsight.intention.PsiElementBaseIntentionAction
 import com.intellij.notification.NotificationGroup
@@ -23,19 +24,19 @@ import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.openapi.wm.WindowManager
 import com.intellij.psi.*
 import com.intellij.ui.awt.RelativePoint
+import com.manolo_stiller.docgpt.state.DocGPTPersistentStateComponent
 import com.manolo_stiller.docgpt.strategies.DocumentationStrategy
+import com.manolo_stiller.docgpt.utils.NotificationUtils
+import com.manolo_stiller.docgpt.utils.SecureStorageUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 
+// https://github.com/JetBrains/intellij-sdk-docs/blob/main/code_samples/conditional_operator_intention/src/main/java/org/intellij/sdk/intention/ConditionalOperatorConverter.java
 class DocGPTIntention : PsiElementBaseIntentionAction(), IntentionAction {
-    private val apiKey = "sk-"
-    val openai = OpenAI(
-        token = apiKey,
-        //timeout = Timeout(socket = 60.seconds),
-    )
+    private val secureStorage = SecureStorageUtil("com.manolo_stiller.docgpt")
+    private val configState = DocGPTPersistentStateComponent.instance.state
+    private val notificationUtils = NotificationUtils()
 
-    private val notificationGroup: NotificationGroup =
-        NotificationGroupManager.getInstance().getNotificationGroup("DocGPT")
 
     override fun getFamilyName(): String {
         return "DocGPTIntention"
@@ -50,68 +51,67 @@ class DocGPTIntention : PsiElementBaseIntentionAction(), IntentionAction {
     }
 
     override fun invoke(project: Project, editor: Editor?, element: PsiElement) {
-        val statusBar = WindowManager.getInstance().getStatusBar(project)
-        val toolWindowManager = ToolWindowManager.getInstance(project)
-        val toolWindow = toolWindowManager.getToolWindow(ToolWindowId.)
-        if (statusBar != null) {
-            println("Statusbar nicht null")
-            JBPopupFactory.getInstance()
-                .createHtmlTextBalloonBuilder("Das ist ein Test", MessageType.INFO, null)
-                .setFadeoutTime(7500)
-                .createBalloon()
-                //.show(RelativePoint.getNorthEastOf(statusBar.component), Balloon.Position.below)
-            .show(RelativePoint.getCenterOf(toolWindow!!.component), Balloon.Position.above)
-        }
-        JBPopupFactory.getInstance().createMessage("HALLO")
-        //notificationGroup.createNotification("Das ist ein test", NotificationType.INFORMATION)
-       //     .notify(project)
+        val openai = OpenAI(
+            token = secureStorage.retrieveData("api_key") ?: "",
+            retry = RetryStrategy(maxRetries = 2)
+        )
+        notificationUtils.sendToolWindowNotification(project, "Generating doc comment")
 
-        /*
         val strategy = DocumentationStrategy.getStrategyByLanguage(element.language) ?: return
         val method = strategy.getMethod(element) ?: return
-        println("test: ${element.text}")
-        println("test2: ${method.text}")
         val prompt =
             "Write me doc comment for the code I provided below in the specific doc style for the language. " +
                     "The programming language is ${element.language.displayName}. Only answer with the doc comment, the function itself should" +
                     " not be included in your response. There should be no errors when I paste the response of you" +
-                    " in my IDE. If you cant produce a doc comment answer with a doc comment that explain why you" +
+                    " in my IDE. If you cant produce a doc comment answer with a doc comment that explains why you" +
                     " couldn't write a doc comment (keep it short).\n" +
                     "The Code:\n${method.text}"
 
-        val promptTokenCount = prompt.length % 4
+        val promptTokenCount = prompt.length % 4 // temporary a tokenizer should be used
 
-        val modelId = ModelId("text-davinci-003")
+        val modelId = ModelId(configState.model)
         val completionRequest = CompletionRequest(
             model = modelId,
             prompt = prompt,
             n = 1,
             echo = false,
-            maxTokens = 2048 - promptTokenCount, // cant be higher than the max token of the specified model
+            maxTokens = configState.maxTokens - promptTokenCount, // cant be higher than the max token of the specified model
         )
 
         // Background thread needed so that the UI doesn't freeze
         val backgroundTask = object : Task.Backgroundable(project, "Background") {
             override fun run(indicator: ProgressIndicator) {
                 val result = runBlocking(Dispatchers.IO) {
-                    openai.completion(completionRequest)
+                    try {
+                        openai.completion(completionRequest)
+                    } catch (e: Exception) {
+                        notificationUtils.sendNotification(project, "Error, check your configurations\n${e.message}", NotificationType.ERROR)
+                        return@runBlocking null
+                    }
                 }
-                result.choices.firstOrNull()?.let {
-                    println(it.text)
+
+                result?.choices?.firstOrNull()?.let {
                     // Needs to be on the UI thread again to update the file
                     ApplicationManager.getApplication().invokeLater {
                         WriteCommandAction.runWriteCommandAction(project) {
-                            val comment = strategy.createComment(project, it.text)
-                            method.parent.addBefore(comment, method)
-
+                            try {
+                                val comment = strategy.createComment(project, it.text)
+                                method.parent.addBefore(comment, method)
+                                notificationUtils.sendToolWindowNotification(project, "Doc comment generated!")
+                            } catch (e: Exception) {
+                                notificationUtils.sendNotification(
+                                    project,
+                                    "Response was not a valid doc comment\n(try again)",
+                                    NotificationType.WARNING
+                                )
+                                println(e)
+                            }
                         }
                     }
                 }
             }
         }
         ProgressManager.getInstance().run(backgroundTask)
-
-         */
     }
 
     override fun getText(): String {
