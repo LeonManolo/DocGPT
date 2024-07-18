@@ -3,6 +3,7 @@ package com.manolo_stiller.docgpt.ui
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.options.Configurable
 import com.intellij.ui.components.JBLabel
+import com.intellij.ui.components.JBPasswordField
 import com.intellij.ui.components.JBTextField
 import com.intellij.util.ui.FormBuilder
 import com.manolo_stiller.docgpt.state.DocGPTPersistentStateComponent
@@ -26,9 +27,11 @@ class DocGPTPersistentStateConfigurable : Configurable, Configurable.NoScroll, D
     private val configState
         get() = DocGPTPersistentStateComponent.instance.state
 
-    val apiKey = secureStorage.retrieveData("api_key")
+    private val apiKey by lazy {
+        secureStorage.retrieveData("api_key")
+    }
     // ui components
-    private val apiKeyField = JBTextField().also {
+    private val apiKeyField = JBPasswordField().also {
         it.text = apiKey
     }
     private val modelField = JBTextField().also {

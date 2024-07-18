@@ -46,7 +46,7 @@ class NotificationUtils {
                 .createHtmlTextBalloonBuilder(content, messageType, null)
                 .setFadeoutTime(fadeoutTime)
                 .createBalloon()
-                .show(RelativePoint.getNorthEastOf(statusBar.component), Balloon.Position.below)
+                .show(statusBar.component?.let { RelativePoint.getNorthEastOf(it) }, Balloon.Position.below)
         }
         //JBPopupFactory.getInstance().createMessage("HALLO")
     }

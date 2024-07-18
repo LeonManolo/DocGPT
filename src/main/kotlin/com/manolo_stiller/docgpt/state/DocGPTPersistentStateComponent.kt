@@ -29,7 +29,7 @@ class DocGPTPersistentStateComponent : PersistentStateComponent<DocGPTPersistent
     }
 
     class DocGPTState {
-        var model: String = "text-davinci-003"
+        var model: String = "gpt-3.5-turbo"
         var maxTokens: Int = 2048
     }
 }

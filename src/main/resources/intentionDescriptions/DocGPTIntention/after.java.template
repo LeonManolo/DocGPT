@@ -1,11 +1,15 @@
-public class X {
-  void f(boolean isMale) {
-    String title;
-    if (isMale) {
-      title = "Mr.";
-    } else {
-      title = "Ms.";
+public class Main {
+    /**
+     * Calculates the n-th Fibonacci number.
+     *
+     * @param n A positive integer.
+     * @return The number of the n-th Fibonacci number.
+     */
+    public static int fibonacci(int n) {
+        if (n <= 1) {
+            return n;
+        } else {
+            return fibonacci(n - 1) + fibonacci(n - 2);
+        }
     }
-    System.out.println("title = " + title);
-  }
 }

@@ -8,13 +8,20 @@
     <name>DocGPT</name>
 
     <!-- A displayed Vendor name or Organization ID displayed on the Plugins Page. -->
-    <vendor email="leonmanolo98@gmail.com" url="https://www.yourcompany.com">Manolo Stiller</vendor>
+    <vendor email="leonmanolo98@gmail.com">Manolo Stiller</vendor>
 
     <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
          Simple HTML elements (text formatting, paragraphs, and lists) can be added inside of <![CDATA[ ]]> tag.
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
     <description><![CDATA[
-    Plugin that makes use of the Chat GPT API to generate documentation for your code.]]></description>
+    DocGPT is a plugin that harnesses the Chat GPT API to generate documentation for your code. It is currently designed to support Java, Kotlin, and Dart languages. Before using, please add your API key via Settings/Tools/DocGPT.
+
+    To generate a doc comment for a function, simply select the function name with the cursor and press alt + enter, then choose "Generate doc comment" from the menu.
+
+    Please note that at present, only doc comments for functions can be generated using this plugin.
+
+    This plugin is still under development and has not been extensively tested yet. We welcome feedback and suggestions to improve the functionality and usability of this plugin. Use at your own risk.
+]]></description>
 
 
     <!-- Product and plugin compatibility requirements.
@@ -31,7 +38,7 @@
         <notificationGroup displayType="TOOL_WINDOW" id="DocGPT_tool_window"/>
         <intentionAction>
             <!-- add "<language>JAVA</language>" when targeting 2022.3 and later only -->
-            <className>com.manolo_stiller.docgpt.DocGPTIntention</className>
+            <className>com.manolo_stiller.docgpt.DocGPTMethodIntention</className>
             <category>SDK intentions</category>
         </intentionAction>
         <applicationService serviceImplementation="com.manolo_stiller.docgpt.state.DocGPTPersistentStateComponent"/>
@@ -41,8 +48,8 @@
                                  id="manolostiller.doc_gpt"/>
     </extensions>
     <actions>
-        <action id="DocGPT" class="DocGPT" description="Generate documentation" text="Generate Documentation">
-            <add-to-group group-id="ToolsMenu" anchor="last"/>
-        </action>
+        <!--        <action id="DocGPT" class="DocGPT" description="Generate documentation" text="Generate Documentation">
+                    <add-to-group group-id="ToolsMenu" anchor="last"/>
+                </action>-->
     </actions>
 </idea-plugin>
