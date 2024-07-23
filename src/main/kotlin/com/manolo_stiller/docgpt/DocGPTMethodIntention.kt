@@ -14,7 +14,8 @@ import com.intellij.openapi.project.Project
 import com.intellij.psi.*
 import com.manolo_stiller.docgpt.state.DocGPTPersistentStateComponent
 import com.manolo_stiller.docgpt.doc_strategies.DocumentationStrategy
-import com.manolo_stiller.docgpt.openai.OpenAI
+import com.manolo_stiller.docgpt.llms.LLM
+import com.manolo_stiller.docgpt.ui.getApiKeyForLLM
 import com.manolo_stiller.docgpt.utils.NotificationUtils
 import com.manolo_stiller.docgpt.utils.SecureStorageUtil
 import kotlinx.coroutines.*
@@ -23,10 +24,6 @@ class DocGPTMethodIntention : PsiElementBaseIntentionAction(), IntentionAction {
     private val secureStorage = SecureStorageUtil("com.manolo_stiller.docgpt")
     private val configState = DocGPTPersistentStateComponent.instance.state
     private val notificationUtils = NotificationUtils()
-    private val apiKey by lazy {
-        secureStorage.retrieveData("api_key")
-    }
-
 
 
     override fun getFamilyName(): String {
@@ -53,29 +50,48 @@ class DocGPTMethodIntention : PsiElementBaseIntentionAction(), IntentionAction {
         val method = strategy.getMethod(element)
         val methodText = method?.text ?: return
 
-        if (apiKey == null) {
-            return notificationUtils.sendNotification(
-                project,
-                "API key not found!",
-                NotificationType.ERROR,
-            )
-        }
+//        if (apiKey == null) {
+//            return notificationUtils.sendNotification(
+//                project,
+//                "API key not found!",
+//                NotificationType.ERROR,
+//            )
+//        }
 
-        val openAI = OpenAI(apiKey = apiKey!!)
+        val activeLLM = configState.activeLLM
+        val model = configState.llms[activeLLM]?.model
+
+
+
+        val maxTokens = configState.llms[activeLLM]?.maxTokens
+        //TODO: Error handling
+        if (model.isNullOrEmpty() || maxTokens == null) return
 
         // Use a background task to avoid blocking the UI thread
         val backgroundTask = object : Task.Backgroundable(project, "AIDocGeneration") {
             override fun run(indicator: ProgressIndicator) {
+
+                //TODO: extensive error handling
+                var notificationErrorMessage = ""
+
                 try {
                     // Run the suspend function in a coroutine
                     val docComment = runBlocking(Dispatchers.IO) {
-                        openAI.generateDocComment(
+                        println(getApiKeyForLLM(configState.activeLLM))
+                        val apiKey = secureStorage.retrieveData(getApiKeyForLLM(configState.activeLLM))
+                        println(apiKey)
+
+                        // TODO: Custom error
+                        val llmApi = LLM.instantiateForLLM(activeLLM, apiKey!!)
+
+
+
+                        llmApi.generateDocComment(
                             functionAsString = methodText,
                             programmingLanguage = element.language.displayName,
-                            model = configState.model,
-                            maxTokens = configState.maxTokens,
+                            model = model,
+                            maxTokens = maxTokens,
                         )
-                         //"/** test */"
                     }
 
                     // Needs to be on the UI thread again to update the file
@@ -88,17 +104,23 @@ class DocGPTMethodIntention : PsiElementBaseIntentionAction(), IntentionAction {
                             } catch (e: Exception) {
                                 notificationUtils.sendNotification(
                                     project,
-                                    "Response was not a valid doc comment\n(try again)",
+                                    "Response was not a valid doc comment\n(try again) \n${e.message}",
                                     NotificationType.WARNING
                                 )
-                                println(e)
+                                println(e.message)
                             }
                         }
                     }
+                } catch (e: NullPointerException) {
+                    notificationUtils.sendNotification(
+                        project,
+                        "API key not set for LLM $activeLLM",
+                        NotificationType.ERROR
+                    )
                 } catch (e: Exception) {
                     notificationUtils.sendNotification(
                         project,
-                        "Error, check your configurations\n${e.message}",
+                        "Error, check your configurations\n\n${e.message}",
                         NotificationType.ERROR
                     )
                 }

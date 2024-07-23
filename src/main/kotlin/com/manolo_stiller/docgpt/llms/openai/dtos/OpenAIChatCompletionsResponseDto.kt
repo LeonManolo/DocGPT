@@ -1,4 +1,4 @@
-package com.manolo_stiller.docgpt.openai.dtos
+package com.manolo_stiller.docgpt.llms.openai.dtos
 
 import kotlinx.serialization.Serializable
 

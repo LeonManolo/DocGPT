@@ -2,13 +2,14 @@
 
 ![DocGPT Logo](https://plugins.jetbrains.com/files/21934/screenshot_9da436fb-83a4-4dc3-b74b-b97398f25ecc)
 
-DocGPT is an IntelliJ plugin that harnesses the power of the OpenAI Chat Completions API to generate documentation for your code. Currently, it supports Java, Kotlin, and Dart.
+DocGPT is an IntelliJ plugin that harnesses the power of the LLMs to generate documentation for your code. Currently, it supports Java, Kotlin, and Dart.
 
 ## Features
 
 - Automatically generate documentation comments for functions.
 - Supports Java, Kotlin, and Dart languages.
 - Easy integration with IntelliJ IDEA.
+- Switch between Google Gemini and OpenAI for generating documentation.
 
 ## Installation
 
@@ -21,6 +22,17 @@ DocGPT is an IntelliJ plugin that harnesses the power of the OpenAI Chat Complet
 2. Select the function name with the cursor.
 3. Press `Alt + Enter`.
 4. Choose `Generate doc comment` from the menu.
+
+## Settings
+
+You can now switch between Google Gemini and OpenAI as the provider for generating documentation.
+
+1. Navigate to `Settings` > `Tools` > `DocGPT`.
+2. Use the dropdown menu to select either `Google Gemini` or `OpenAI`.
+3. Enter the respective *API key, model and the maximum amount of tokens* for the selected provider.
+4. Save your settings.
+
+![Settings](https://plugins.jetbrains.com/files/21934/screenshot_dc5065f1-0c3a-4a60-967b-05847cf33f11)
 
 ## Screenshots
 
@@ -36,8 +48,12 @@ DocGPT is an IntelliJ plugin that harnesses the power of the OpenAI Chat Complet
 
 - Currently, the plugin only generates doc comments for functions.
 - The plugin is still under development and has not been extensively tested yet.
-- We welcome feedback and suggestions to improve the functionality and usability of this plugin.
+- I welcome feedback and suggestions to improve the functionality and usability of this plugin.
 - Use at your own risk.
+
+## Features planned for the future
+- Supporting more LLMs
+- Setting the function context scope
 
 ## Contributing
 

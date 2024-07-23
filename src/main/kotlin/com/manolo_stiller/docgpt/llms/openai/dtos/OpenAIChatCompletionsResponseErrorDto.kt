@@ -1,4 +1,4 @@
-package com.manolo_stiller.docgpt.openai.dtos
+package com.manolo_stiller.docgpt.llms.openai.dtos
 
 import kotlinx.serialization.Serializable
 
@@ -6,4 +6,4 @@ import kotlinx.serialization.Serializable
 data class OpenAIChatCompletionsResponseErrorDto(val error: OpenAIChatCompletionsResponseErrorErrorDto)
 
 @Serializable
-data class OpenAIChatCompletionsResponseErrorErrorDto(val message: String, val code: String)
+data class OpenAIChatCompletionsResponseErrorErrorDto(val message: String, val code: String?)
